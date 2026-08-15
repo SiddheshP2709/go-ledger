@@ -335,8 +335,3 @@ The server connects to PostgreSQL, applies migrations from `db/migrations/`, and
 - **Missing database indexes:** `ledger_entries.source_account_id` and `destination_account_id` do not have explicit indexes yet; history queries will perform sequential scans as the table grows.
 - **Auth is a placeholder:** `authMiddleware` checks bearer header format only, not a cryptographically signed token (see §7).
 - **Observability & rate limiting:** No rate limiting, structured metrics (Prometheus), or distributed tracing (OpenTelemetry) configured yet.
-
----
-
-## License
-This project is licensed under the MIT License.
