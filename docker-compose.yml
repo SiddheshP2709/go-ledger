@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  ledger_db:
+    image: postgres:15-alpine
+    container_name: ledger_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: wallet_ledger
+    ports:
+      - "5433:5432"
+    volumes:
+      - ledger_db_data:/var/lib/postgresql/data
+
+volumes:
+  ledger_db_data:
+    driver: local
