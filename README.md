@@ -1,4 +1,4 @@
-# 💳 FinTech Ledger API
+# FinTech Ledger API
 
 [![Go Version](https://img.shields.io/badge/Go-1.20+-00ADD8?style=flat&logo=go)](https://golang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
@@ -9,7 +9,7 @@ A financial ledger API built with **Go (Golang)**, **Gin Framework**, and **Post
 
 ---
 
-## 🏛️ Architecture & Core Design
+## Architecture & Core Design
 
 ```
                   ┌─────────────────────────────────────────────────────────┐
@@ -43,7 +43,7 @@ A financial ledger API built with **Go (Golang)**, **Gin Framework**, and **Post
 
 ### 1. Concurrency Control & Deadlock Prevention
 
-#### 🔹 `READ COMMITTED` + Pessimistic Row Locking (`SELECT ... FOR UPDATE`)
+#### READ COMMITTED + Pessimistic Row Locking (`SELECT ... FOR UPDATE`)
 All balance updates are executed within a database transaction using:
 ```go
 // Explicitly using READ COMMITTED with FOR UPDATE (Pessimistic Locking) to avoid serialization anomaly retries.
@@ -52,10 +52,10 @@ tx, err := db.BeginTx(c.Request.Context(), &sql.TxOptions{Isolation: sql.LevelRe
 * **Why not `SERIALIZABLE`?** Under high concurrency, `SERIALIZABLE` isolation in PostgreSQL can abort concurrent transactions modifying the same accounts with serialization failure errors (`SQLSTATE 40001`), requiring retry logic in the application.
 * **Approach:** Using `READ COMMITTED` with `SELECT ... FOR UPDATE` queues concurrent balance updates at the database row lock level, avoiding serialization aborts.
 
-#### 🔹 Preventing Two-Account Circular Deadlocks via Lexicographical Sorting
+#### Preventing Two-Account Circular Deadlocks via Lexicographical Sorting
 In two-party transfers, a circular wait deadlock can occur if:
-* **Thread A** transfers from **Account 1** $\rightarrow$ **Account 2** (Locks Account 1, waits for Account 2)
-* **Thread B** transfers from **Account 2** $\rightarrow$ **Account 1** (Locks Account 2, waits for Account 1)
+* **Thread A** transfers from **Account 1** -> **Account 2** (Locks Account 1, waits for Account 2)
+* **Thread B** transfers from **Account 2** -> **Account 1** (Locks Account 2, waits for Account 1)
 
 * **Approach:** The transfer handler sorts both account UUID strings in alphabetical order prior to acquiring locks:
 ```go
@@ -72,7 +72,7 @@ Enforcing a consistent locking order across all requests prevents the classic ci
 ### 2. Automated Testing (`main_test.go`)
 
 The test suite in `main_test.go` verifies functionality across positive, negative, and concurrent scenarios:
-* **Concurrent Bidirectional Transfers:** Spins up 100 concurrent goroutines (50 transfers $A \rightarrow B$ of $10, and 50 transfers $B \rightarrow A$ of $10$) against two accounts initialized with $1,000.00 each.
+* **Concurrent Bidirectional Transfers:** Spins up 100 concurrent goroutines (50 transfers A -> B of $10, and 50 transfers B -> A of $10) against two accounts initialized with $1,000.00 each.
 * **Verification:** Confirms that after all 100 concurrent requests finish, both accounts retain their exact starting balance of **$1,000.0000** without race conditions or deadlocks.
 * **Additional Test Cases:**
   - Insufficient balance rejection (`400 Bad Request`).
@@ -140,7 +140,7 @@ Database schema initialization is version-controlled using [`golang-migrate/migr
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -172,7 +172,7 @@ CREATE TABLE idempotency_keys (
 
 ---
 
-## 📡 API Endpoints Documentation
+## API Endpoints Documentation
 
 Protected endpoints require the HTTP header:
 ```http
@@ -304,7 +304,7 @@ Authorization: Bearer <token>
 
 ---
 
-## ⚡ Getting Started
+## Getting Started
 
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed & running
@@ -328,7 +328,7 @@ The server connects to PostgreSQL, applies migrations from `db/migrations/`, and
 
 ---
 
-## 🔭 Known Limitations & Next Steps
+## Known Limitations & Next Steps
 
 - **Idempotency replay:** Duplicate requests currently return `409 Conflict` rather than replaying the original successful response. A production version would cache and return the original result on retry.
 - **No idempotency-key-to-payload binding:** A retried key with a *different* payload amount isn't currently detected as a parameter mutation.
@@ -338,5 +338,5 @@ The server connects to PostgreSQL, applies migrations from `db/migrations/`, and
 
 ---
 
-## 📜 License
+## License
 This project is licensed under the MIT License.
